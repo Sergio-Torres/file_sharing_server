@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 )
@@ -10,18 +11,18 @@ func main(){
     s := newServer()
     go s.run()
 
-    listener, err := net.Listener("tcp", ":1234")
+    l, err := net.Listen("tcp", ":1234")
     if err != nil{
-        log.Fatal("unable to start server: %s", err.Error())
+        fmt.Printf("unable to start server: %s", err.Error())
     }
 
-    defer listener.Close()
+    defer l.Close()
     log.Printf("started server on :1234")
 
     for{
-        conn, err := listener.Accept()
+        conn, err := l.Accept()
         if err != nil{
-            log.Printf("unable to accepy connection %s", err.Error())
+            fmt.Printf("unable to accepy connection %s", err.Error())
             continue
         }
         

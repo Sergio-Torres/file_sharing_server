@@ -3,9 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"os"
-    "strconv"
+	"strconv"
 	"strings"
 )
 
@@ -14,7 +15,24 @@ type server struct{
     commands chan command
 }
 
+func newServer() *server{
+    return &server{
+        channels: make(map[string]*channel),
+        commands: make(chan command),
+    }
+}
+func (s *server) newClient(conn net.Conn){
+    log.Printf("New client has connected: %s", conn.RemoteAddr().String())
+    
+    c := &client{
+        conn : conn,
+        nick: "none",
+        commands: s.commands,
+    }
 
+}
+
+/*
 var count = 0
 
 func handleConnection(c net.Conn){
@@ -64,4 +82,4 @@ func main(){
         count++
     }
 
-}
+}*/

@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+type server struct{
+    channels map[string]*channel
+    commands chan command
+}
+
 
 var count = 0
 

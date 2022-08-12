@@ -35,25 +35,25 @@ func (c *client) readInput(){
             }
         case "/join":
              c.commands <- command{
-                id: cmd_nick,
+                id: cmd_join,
                 client: c,
                 args: args,
             }
         case "/channels":
             c.commands <- command{
-                id: cmd_nick,
+                id: cmd_channels,
                 client: c,
                 args: args,
             }
         case "/msg":
             c.commands <- command{
-                id: cmd_nick,
+                id: cmd_msg,
                 client: c,
                 args: args,
             }
         case "/exit":
             c.commands <- command{
-                id: cmd_nick,
+                id: cmd_exit,
                 client: c,
                 args: args,
             }

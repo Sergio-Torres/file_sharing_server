@@ -8,7 +8,9 @@ import (
 
 func main(){
     s := newServer()
-    listener, err := net.Listener("tcp", "1234")
+    go s.run()
+
+    listener, err := net.Listener("tcp", ":1234")
     if err != nil{
         log.Fatal("unable to start server: %s", err.Error())
     }

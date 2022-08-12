@@ -29,6 +29,7 @@ func (s *server) newClient(conn net.Conn){
         nick: "none",
         commands: s.commands,
     }
+    
 
 }
 

@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+type client struct{
+    conn net.Conn
+    nick string
+    channel *channel
+    commands chan<- command
+}
 func main(){
     arguments := os.Args
     if len(arguments)==1{

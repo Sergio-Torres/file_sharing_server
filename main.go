@@ -11,13 +11,13 @@ func main(){
     s := newServer()
     go s.run()
 
-    l, err := net.Listen("tcp", ":1234")
+    l, err := net.Listen("tcp", ":8888")
     if err != nil{
-        fmt.Printf("unable to start server: %s", err.Error())
+        log.Fatalf("unable to start server: %s", err.Error())
     }
 
     defer l.Close()
-    log.Printf("started server on :1234")
+    log.Printf("started server on :8888")
 
     for{
         conn, err := l.Accept()
@@ -26,6 +26,6 @@ func main(){
             continue
         }
         
-        s.newClient(conn)
+        go s.newClient(conn)
     }
 }

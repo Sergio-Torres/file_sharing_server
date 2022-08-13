@@ -43,7 +43,7 @@ func (s *server) newClient(conn net.Conn){
     
     c := &client{
         conn : conn,
-        nick: "none",
+        nick: "anonymous",
         commands: s.commands,
     }
     

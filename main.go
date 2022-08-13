@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net"
+
 )
 
+const BUFFERSIZE = 1024
 
 func main(){
     s := newServer()
@@ -22,7 +24,7 @@ func main(){
     for{
         conn, err := l.Accept()
         if err != nil{
-            fmt.Printf("unable to accepy connection %s", err.Error())
+            fmt.Printf("unable to accept connection %s", err.Error())
             continue
         }
         

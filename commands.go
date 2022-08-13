@@ -8,6 +8,7 @@ const (
     cmd_channels
     cmd_msg
     cmd_exit
+    cmd_file
 )
 
 type command struct{

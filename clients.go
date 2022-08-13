@@ -25,7 +25,7 @@ func (c *client) readInput(){
 
         args := strings.Split(msg, " ")
         cmd := strings.TrimSpace(args[0])
-
+        
         switch cmd{
         case "/nick": 
             c.commands <- command{
@@ -57,6 +57,12 @@ func (c *client) readInput(){
                 client: c,
                 args: args,
             }
+        case "/file":
+            c.commands <-command{
+                id: cmd_file,
+                client: c,
+                args: args,
+            }
         default:
             c.err(fmt.Errorf("[!]Unknown command: %s", cmd))
         }
@@ -70,6 +76,8 @@ func (c *client) err(err error){
 func (c *client) msg(msg string){
     c.conn.Write([]byte(">> "+ msg + "\n"))
 }
+
+
 /*
 func main(){
     arguments := os.Args

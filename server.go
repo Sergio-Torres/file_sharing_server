@@ -3,8 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"os"
+	"strconv"
 	"strings"
 )
 
@@ -32,6 +35,8 @@ func (s *server) run(){
             s.msg(cmd.client, cmd.args)
         case cmd_exit:
             s.exit(cmd.client, cmd.args)
+        case cmd_file:
+            s.file(cmd.client, cmd.args)
         }
 
 
@@ -87,12 +92,90 @@ func (s *server) listChannels(c *client, args []string){
 
 func (s *server) msg(c *client, args []string){
     if c.channel == nil{
-        c.err(errors.New("[*] you musy join the room first"))
+        c.err(errors.New("[!] you musy join the channel first"))
         return
     }
 
     c.channel.broadcast(c, c.nick + ":" + strings.Join(args[1:len(args)], " "))
 }
+
+func (s *server) file(c *client, args []string){
+    /*
+    go func (x c.conn){
+        defer func(){
+            x.Close()
+            done <- struct{}{}
+        }()
+        buffer := make([]byte, BUFFERSIZE)
+    }(c.conn)
+    f, err := os.Open(fileN)
+    //revisar este error
+    if err != nil{
+        log.Fatal(err.Error())
+    }
+    pr, pw := io.Pipe()
+    w, err := gzip.NewWriterLevel(pw,7)
+    if err != nil{
+            log.Fatal(err.Error())
+    }
+
+    go func(){
+        n, err := io.Copy(w, f)
+        if err != nil{
+            log.Fatal(err.Error())
+        }
+        w.Close()
+        pw.Close()
+        log.Printf("se ha copiado y escrito la vaina %s", n)
+    }()
+    n, err := io.Copy(c.conn, pr)
+    if err != nil{
+        log.Fatal(err.Error())
+    }
+    log.Printf("se ha copaido la conexion: %s", n)
+    */
+    fileN := args[1]
+    f, err := os.Open(fileN)
+    //revisar este error
+    if err != nil{
+        log.Fatal(err.Error())
+    }
+
+    fileInfo, err := f.Stat()
+    if err != nil{
+        log.Fatal(err.Error())
+    }
+    
+    fileSize := strconv.FormatInt(fileInfo.Size(),10)
+    fileName := fileInfo.Name()
+    c.conn.Write([]byte(fileSize))
+    c.conn.Write([]byte(fileName))
+    buffer := make([]byte, BUFFERSIZE)
+
+    for{
+        _, err = f.Read(buffer)
+        if err  == io.EOF{
+            break
+        }
+        c.conn.Write(buffer)
+
+    }
+    
+    if c.channel == nil{
+        c.err(errors.New("[!] you must join the channel first"))
+        return
+    }
+
+    c.msg(fmt.Sprintf("[*] yo have sent file %s", fileN))
+    log.Printf("%s has sent %s",c.nick, fileN)
+    if c.channel !=nil{
+        c.channel.broadcast(c, fmt.Sprintf("[*] %s has shared %s", c.nick, fileN))
+    }
+
+}
+
+
+
 func (s *server) exit(c *client, args []string){
     log.Printf("[!] client has disconnected: %s", c.conn.RemoteAddr().String())
 
@@ -109,54 +192,4 @@ func (s *server) exitCurrentChannel(c *client){
     }
 }
 
-/*
-var count = 0
 
-func handleConnection(c net.Conn){
-    fmt.Print(".")
-    for{
-        netData, err := bufio.NewReader(c).ReadString('\n')
-        if err != nil{
-            fmt.Println(err)
-            return
-        }
-
-        temp := strings.TrimSpace(string(netData))
-        if temp == "STOP"{
-            break
-        }
-
-        fmt.Println(temp)
-        counter := strconv.Itoa(count) + "\n"
-        c.Write([]byte(string(counter)))
-    }
-    c.Close()
-}
-
-func main(){
-    arguments := os.Args
-    if len(arguments) ==1{
-        fmt.Println("Please provide a port number!")
-        return
-    }
-
-    PORT := ":" + arguments[1]
-    l, err := net.Listen("tcp4", PORT)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-    defer l.Close()
-
-    for {
-        c, err := l.Accept()
-        if err != nil{
-            fmt.Println(err)
-            return
-        }
-
-        go handleConnection(c)
-        count++
-    }
-
-}*/

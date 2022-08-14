@@ -11,6 +11,7 @@ type client struct{
     conn net.Conn
     nick string
     channel *channel
+    file *file
     commands chan<- command
 }
 
@@ -63,6 +64,13 @@ func (c *client) readInput(){
                 client: c,
                 args: args,
             }
+        case "/files":
+            c.commands <-command{
+                id: cmd_files,
+                client: c,
+                args: args,
+            }
+
         default:
             c.err(fmt.Errorf("[!]Unknown command: %s", cmd))
         }

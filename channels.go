@@ -7,6 +7,10 @@ type channel struct{
     members map[net.Addr]*client
 }
 
+type file struct{
+    name string
+    members map[net.Addr]*client
+}
 func (ch *channel) broadcast(sender *client, msg string){
     for addr, m := range ch.members{
         if addr != sender.conn.RemoteAddr(){

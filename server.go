@@ -13,12 +13,14 @@ import (
 
 type server struct{
     channels map[string]*channel
+    files map[string]*file
     commands chan command
 }
 
 func newServer() *server{
     return &server{
         channels: make(map[string]*channel),
+        files: make(map[string]*file),
         commands: make(chan command),
     }
 }
@@ -37,6 +39,8 @@ func (s *server) run(){
             s.exit(cmd.client, cmd.args)
         case cmd_file:
             s.file(cmd.client, cmd.args)
+        case cmd_files:
+            s.listFiles(cmd.client, cmd.args)
         }
 
 
@@ -134,7 +138,19 @@ func (s *server) file(c *client, args []string){
     }
     log.Printf("se ha copaido la conexion: %s", n)
     */
+    //enviar la información al canal
     fileN := args[1]
+    fl, ok := s.files[fileN]
+
+    if !ok {
+        fl = &file{
+            name: fileN,
+            members: make(map[net.Addr]*client),
+        }
+        s.files[fileN] = fl
+    }
+
+
     f, err := os.Open(fileN)
     //revisar este error
     if err != nil{
@@ -173,7 +189,19 @@ func (s *server) file(c *client, args []string){
     }
 
 }
+func (s *server) listFiles(c *client, args []string){
+    //extraer el nombre del archivo, verificar si existe, crear
+    //una carpeta y copiarlo ahí, pero igual se necesita guardar todos 
+    //los archivos en un array
+    var files []string
+    for name := range s.files{
+        files = append(files, name)
+    }
 
+    c.msg(fmt.Sprintf("Available files are: %s", strings.Join(files, ",")))
+
+
+}
 
 
 func (s *server) exit(c *client, args []string){

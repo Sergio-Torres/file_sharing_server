@@ -9,6 +9,7 @@ const (
     cmd_msg
     cmd_exit
     cmd_file
+    cmd_files
 )
 
 type command struct{

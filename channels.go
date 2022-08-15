@@ -20,10 +20,3 @@ func (ch *channel) broadcast(sender *client, msg string){
     }
 } 
 
-/*func (ch *channel) fileBroadcast(sender *client, file string){
-    for addr, f := range ch.members{
-        if addr != sender.conn.RemoteAddr(){
-            f.file(file)
-        }
-    }
-}*/

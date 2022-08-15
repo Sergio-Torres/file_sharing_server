@@ -7,8 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"strconv"
-	"strings"
+    "strings"
 )
 
 type server struct{
@@ -41,6 +40,8 @@ func (s *server) run(){
             s.file(cmd.client, cmd.args)
         case cmd_files:
             s.listFiles(cmd.client, cmd.args)
+        case cmd_save:
+            s.saveFile(cmd.client, cmd.args)
         }
 
 
@@ -104,41 +105,6 @@ func (s *server) msg(c *client, args []string){
 }
 
 func (s *server) file(c *client, args []string){
-    /*
-    go func (x c.conn){
-        defer func(){
-            x.Close()
-            done <- struct{}{}
-        }()
-        buffer := make([]byte, BUFFERSIZE)
-    }(c.conn)
-    f, err := os.Open(fileN)
-    //revisar este error
-    if err != nil{
-        log.Fatal(err.Error())
-    }
-    pr, pw := io.Pipe()
-    w, err := gzip.NewWriterLevel(pw,7)
-    if err != nil{
-            log.Fatal(err.Error())
-    }
-
-    go func(){
-        n, err := io.Copy(w, f)
-        if err != nil{
-            log.Fatal(err.Error())
-        }
-        w.Close()
-        pw.Close()
-        log.Printf("se ha copiado y escrito la vaina %s", n)
-    }()
-    n, err := io.Copy(c.conn, pr)
-    if err != nil{
-        log.Fatal(err.Error())
-    }
-    log.Printf("se ha copaido la conexion: %s", n)
-    */
-    //enviar la información al canal
     fileN := args[1]
     fl, ok := s.files[fileN]
 
@@ -150,33 +116,18 @@ func (s *server) file(c *client, args []string){
         s.files[fileN] = fl
     }
 
-
-    f, err := os.Open(fileN)
-    //revisar este error
+    f, err := os.Open("./"+fileN)
+    //evisar este error
     if err != nil{
         log.Fatal(err.Error())
     }
 
-    fileInfo, err := f.Stat()
+    defer f.Close()
+    _, err = io.Copy(c.conn, f)
     if err != nil{
         log.Fatal(err.Error())
     }
-    
-    fileSize := strconv.FormatInt(fileInfo.Size(),10)
-    fileName := fileInfo.Name()
-    c.conn.Write([]byte(fileSize))
-    c.conn.Write([]byte(fileName))
-    buffer := make([]byte, BUFFERSIZE)
-
-    for{
-        _, err = f.Read(buffer)
-        if err  == io.EOF{
-            break
-        }
-        c.conn.Write(buffer)
-
-    }
-    
+   
     if c.channel == nil{
         c.err(errors.New("[!] you must join the channel first"))
         return
@@ -200,9 +151,28 @@ func (s *server) listFiles(c *client, args []string){
 
     c.msg(fmt.Sprintf("Available files are: %s", strings.Join(files, ",")))
 
-
 }
 
+func (s *server) saveFile(c *client, args[]string){
+    fileN := args[1]
+    newFile, err := os.Create(c.nick + "_" + fileN)
+
+    if err != nil{
+        panic(err.Error())
+    }
+    //se puee hacer un bucle que compare el nombre de los files
+    //y ahí si lo cree, en caso de que esto no funcione
+    defer newFile.Close()
+   
+    _, err = io.Copy(c.conn, newFile)
+    if err != nil{
+        log.Fatal(err.Error())
+    }
+
+    log.Printf("%s has downloaded %s",c.nick, fileN)
+    c.msg(fmt.Sprintf("[!] You have downloaded a file as %s",c.nick + "_" + fileN ))
+    
+}
 
 func (s *server) exit(c *client, args []string){
     log.Printf("[!] client has disconnected: %s", c.conn.RemoteAddr().String())

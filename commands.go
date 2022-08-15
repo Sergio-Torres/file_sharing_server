@@ -10,6 +10,7 @@ const (
     cmd_exit
     cmd_file
     cmd_files
+    cmd_save
 )
 
 type command struct{

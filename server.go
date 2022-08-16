@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
     "strings"
+   
 )
 
 type server struct{
@@ -84,6 +85,7 @@ func (s *server) join(c *client, args []string){
     
     ch.broadcast(c, fmt.Sprintf("[*] %s has joined the channel", c.nick))
     c.msg(fmt.Sprintf("[!] welcome to %s", ch.name))
+    log.Printf("%s has entered the channel %s", c.nick, ch.name)
 }
 
 func (s *server) listChannels(c *client, args []string){
@@ -97,7 +99,7 @@ func (s *server) listChannels(c *client, args []string){
 
 func (s *server) msg(c *client, args []string){
     if c.channel == nil{
-        c.err(errors.New("[!] you musy join the channel first"))
+        c.err(errors.New("[!] you must join the channel first"))
         return
     }
 
@@ -121,12 +123,14 @@ func (s *server) file(c *client, args []string){
     if err != nil{
         log.Fatal(err.Error())
     }
+    
 
     defer f.Close()
     _, err = io.Copy(c.conn, f)
     if err != nil{
         log.Fatal(err.Error())
     }
+    
    
     if c.channel == nil{
         c.err(errors.New("[!] you must join the channel first"))
@@ -141,9 +145,6 @@ func (s *server) file(c *client, args []string){
 
 }
 func (s *server) listFiles(c *client, args []string){
-    //extraer el nombre del archivo, verificar si existe, crear
-    //una carpeta y copiarlo ahí, pero igual se necesita guardar todos 
-    //los archivos en un array
     var files []string
     for name := range s.files{
         files = append(files, name)
@@ -154,14 +155,14 @@ func (s *server) listFiles(c *client, args []string){
 }
 
 func (s *server) saveFile(c *client, args[]string){
+   
     fileN := args[1]
     newFile, err := os.Create(c.nick + "_" + fileN)
 
     if err != nil{
         panic(err.Error())
     }
-    //se puee hacer un bucle que compare el nombre de los files
-    //y ahí si lo cree, en caso de que esto no funcione
+    
     defer newFile.Close()
    
     _, err = io.Copy(c.conn, newFile)
@@ -175,7 +176,7 @@ func (s *server) saveFile(c *client, args[]string){
 }
 
 func (s *server) exit(c *client, args []string){
-    log.Printf("[!] client has disconnected: %s", c.conn.RemoteAddr().String())
+    log.Printf("[!] %s has disconnected: %s",c.nick, c.conn.RemoteAddr().String())
 
     s.exitCurrentChannel(c)
     c.msg("Bye..")

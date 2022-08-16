@@ -119,7 +119,6 @@ func (s *server) file(c *client, args []string){
     }
 
     f, err := os.Open("./"+fileN)
-    //evisar este error
     if err != nil{
         log.Fatal(err.Error())
     }
@@ -138,7 +137,7 @@ func (s *server) file(c *client, args []string){
     }
 
     c.msg(fmt.Sprintf("[*] yo have sent file %s", fileN))
-    log.Printf("%s has sent %s",c.nick, fileN)
+    log.Printf("%s has sent %s in the channel %s",c.nick, fileN, c.channel.name)
     if c.channel !=nil{
         c.channel.broadcast(c, fmt.Sprintf("[*] %s has shared %s", c.nick, fileN))
     }
@@ -157,10 +156,10 @@ func (s *server) listFiles(c *client, args []string){
 func (s *server) saveFile(c *client, args[]string){
    
     fileN := args[1]
+
     f, err := os.Open(fileN)
     if err != nil {
         log.Fatal(err.Error())
-        return
     }
     defer func(){
         if err := f.Close(); err != nil{

@@ -27,7 +27,7 @@ In the server terminal it should show a message like:
 - `/msg` This command is used to send messages to other clients in the channels, for example `/msg hello everyone`
 - `/file` This message is used to send files to a channel, for example `/file file.txt`
 - `/files` This command displays all available channels.
-- `/save` This command is used to save a file, for example `/save archivo.txt`
+- `/save` This command is used to save a file, for example `/save archivo.txt`. A file with the client name and the original name will be created and saved in the directory, `Juan_archivo.txt` for example.
 - `/exit` This command is used to leave the server.
 
 The important thing to know is that although it is not necessary for the client to connect to the directory 

@@ -157,6 +157,17 @@ func (s *server) listFiles(c *client, args []string){
 func (s *server) saveFile(c *client, args[]string){
    
     fileN := args[1]
+    f, err := os.Open(fileN)
+    if err != nil {
+        log.Fatal(err.Error())
+        return
+    }
+    defer func(){
+        if err := f.Close(); err != nil{
+            log.Fatal(err.Error())
+        }
+    }()
+
     newFile, err := os.Create(c.nick + "_" + fileN)
 
     if err != nil{
@@ -164,10 +175,19 @@ func (s *server) saveFile(c *client, args[]string){
     }
     
     defer newFile.Close()
-   
-    _, err = io.Copy(c.conn, newFile)
-    if err != nil{
-        log.Fatal(err.Error())
+    
+    buffer := make([]byte, BUFFERSIZE)
+    for{
+        n, err := f.Read(buffer)
+        if err != nil && err != io.EOF{
+            panic(err.Error())
+        }
+        if n == 0{
+            break
+        }
+        if _, err := newFile.Write(buffer[:n]); err != nil{
+            panic(err.Error())
+        }
     }
 
     log.Printf("%s has downloaded %s",c.nick, fileN)

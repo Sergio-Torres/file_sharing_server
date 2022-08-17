@@ -119,16 +119,12 @@ func (s *server) file(c *client, args []string){
     }
 
     f, err := os.Open("./"+fileN)
-    if err != nil{
-        log.Fatal(err.Error())
-    }
-    
+    CheckError(err)
 
     defer f.Close()
     _, err = io.Copy(c.conn, f)
-    if err != nil{
-        log.Fatal(err.Error())
-    }
+    //aqui se quito un if error
+    CheckError(err)
     
    
     if c.channel == nil{
@@ -158,9 +154,8 @@ func (s *server) saveFile(c *client, args[]string){
     fileN := args[1]
 
     f, err := os.Open(fileN)
-    if err != nil {
-        log.Fatal(err.Error())
-    }
+    CheckError(err)
+
     defer func(){
         if err := f.Close(); err != nil{
             log.Fatal(err.Error())
@@ -168,10 +163,7 @@ func (s *server) saveFile(c *client, args[]string){
     }()
 
     newFile, err := os.Create(c.nick + "_" + fileN)
-
-    if err != nil{
-        panic(err.Error())
-    }
+    CheckError(err)
     
     defer newFile.Close()
     
